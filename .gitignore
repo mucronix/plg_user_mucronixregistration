@@ -1,0 +1,7 @@
+# Build results
+build/
+*.zip
+
+# Working material of the owner, not part of the source
+old/
+TZ-mucronixregistration.md

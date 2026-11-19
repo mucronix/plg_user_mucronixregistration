@@ -1,0 +1,1 @@
+-- Mucronix Registration 1.0.0: initial schema version. Nothing to update.

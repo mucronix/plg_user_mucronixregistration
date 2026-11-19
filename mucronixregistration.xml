@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="user" method="upgrade">
+	<name>PLG_USER_MUCRONIXREGISTRATION</name>
+	<author>Mucronix</author>
+	<creationDate>2026-11-19</creationDate>
+	<copyright>(C) 2026 Mucronix</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<authorEmail>support@mucronix.com</authorEmail>
+	<authorUrl>https://mucronix.com</authorUrl>
+	<version>1.0.0</version>
+	<description>PLG_USER_MUCRONIXREGISTRATION_XML_DESCRIPTION</description>
+	<namespace path="src">Mucronix\Plugin\User\MucronixRegistration</namespace>
+	<scriptfile>script.php</scriptfile>
+
+	<files>
+		<folder plugin="mucronixregistration">services</folder>
+		<folder>forms</folder>
+		<folder>language</folder>
+		<folder>sql</folder>
+		<folder>src</folder>
+		<filename>LICENSE.txt</filename>
+		<filename>LICENSE-data.txt</filename>
+	</files>
+
+	<media destination="plg_user_mucronixregistration" folder="media">
+		<filename>joomla.asset.json</filename>
+		<folder>js</folder>
+	</media>
+
+	<install>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+		</sql>
+	</install>
+
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+		</sql>
+	</uninstall>
+
+	<update>
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql</schemapath>
+		</schemas>
+	</update>
+
+	<updateservers>
+		<server type="extension" priority="1" name="Mucronix Registration">https://raw.githubusercontent.com/mucronix/plg_user_mucronixregistration/main/update/plg_user_mucronixregistration.xml</server>
+	</updateservers>
+
+	<config>
+		<fields name="params">
+			<fieldset
+				name="basic"
+				addfieldprefix="Mucronix\Plugin\User\MucronixRegistration\Field"
+				addruleprefix="Mucronix\Plugin\User\MucronixRegistration\Rule"
+			>
+				<field
+					name="uninstall_note"
+					type="note"
+					class="alert alert-info w-100"
+					description="PLG_USER_MUCRONIXREGISTRATION_UNINSTALL_NOTE"
+				/>
+
+				<field
+					name="hide_name"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="PLG_USER_MUCRONIXREGISTRATION_HIDE_NAME_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_HIDE_NAME_DESC"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="country_required"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="PLG_USER_MUCRONIXREGISTRATION_COUNTRY_REQUIRED_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_COUNTRY_REQUIRED_DESC"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="store_ip"
+					type="radio"
+					layout="joomla.form.field.radio.switcher"
+					label="PLG_USER_MUCRONIXREGISTRATION_STORE_IP_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_STORE_IP_DESC"
+					default="1"
+					filter="integer"
+					>
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+
+				<field
+					name="profile_site"
+					type="list"
+					label="PLG_USER_MUCRONIXREGISTRATION_PROFILE_SITE_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_PROFILE_SITE_DESC"
+					default="2"
+					filter="integer"
+					validate="options"
+					>
+					<option value="0">PLG_USER_MUCRONIXREGISTRATION_PROFILE_SITE_HIDE</option>
+					<option value="1">PLG_USER_MUCRONIXREGISTRATION_PROFILE_SITE_VIEW</option>
+					<option value="2">PLG_USER_MUCRONIXREGISTRATION_PROFILE_SITE_EDIT</option>
+				</field>
+
+				<field
+					name="countries_mode"
+					type="radio"
+					layout="joomla.form.field.radio.buttons"
+					label="PLG_USER_MUCRONIXREGISTRATION_COUNTRIES_MODE_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_COUNTRIES_MODE_DESC"
+					default="all"
+					validate="options"
+					>
+					<option value="all">PLG_USER_MUCRONIXREGISTRATION_COUNTRIES_MODE_ALL</option>
+					<option value="selected">PLG_USER_MUCRONIXREGISTRATION_COUNTRIES_MODE_SELECTED</option>
+				</field>
+
+				<field
+					name="countries"
+					type="mucronixcountries"
+					label="PLG_USER_MUCRONIXREGISTRATION_COUNTRIES_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_COUNTRIES_DESC"
+					multiple="true"
+					layout="joomla.form.field.list-fancy-select"
+					showon="countries_mode:selected"
+				/>
+
+				<field
+					name="regions_mode"
+					type="radio"
+					layout="joomla.form.field.radio.buttons"
+					label="PLG_USER_MUCRONIXREGISTRATION_REGIONS_MODE_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_REGIONS_MODE_DESC"
+					default="all"
+					validate="options"
+					>
+					<option value="all">PLG_USER_MUCRONIXREGISTRATION_REGIONS_MODE_ALL</option>
+					<option value="selected">PLG_USER_MUCRONIXREGISTRATION_REGIONS_MODE_SELECTED</option>
+				</field>
+
+				<field
+					name="region_countries"
+					type="mucronixcountries"
+					label="PLG_USER_MUCRONIXREGISTRATION_REGION_COUNTRIES_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_REGION_COUNTRIES_DESC"
+					multiple="true"
+					regions="true"
+					layout="joomla.form.field.list-fancy-select"
+					showon="regions_mode:selected"
+				/>
+
+				<field
+					name="top_countries"
+					type="text"
+					label="PLG_USER_MUCRONIXREGISTRATION_TOP_COUNTRIES_LABEL"
+					description="PLG_USER_MUCRONIXREGISTRATION_TOP_COUNTRIES_DESC"
+					hint="UA, PL"
+					filter="string"
+					validate="mucronixcountrycodes"
+				/>
+			</fieldset>
+		</fields>
+	</config>
+</extension>

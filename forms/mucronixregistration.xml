@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="mucronixregistration">
+		<fieldset
+			name="mucronixregistration"
+			label="PLG_USER_MUCRONIXREGISTRATION_FIELDSET_LABEL"
+			addfieldprefix="Mucronix\Plugin\User\MucronixRegistration\Field"
+		>
+			<!-- required is set by the plugin: on the site from the settings, off in the administrator area. -->
+			<field
+				name="country"
+				type="mucronixcountry"
+				label="PLG_USER_MUCRONIXREGISTRATION_COUNTRY_LABEL"
+				filter="string"
+			/>
+
+			<!-- No validate="options": the list is loaded for the chosen country.
+			     The plugin checks the region against the country on saving. -->
+			<field
+				name="region"
+				type="mucronixregion"
+				label="PLG_USER_MUCRONIXREGISTRATION_REGION_LABEL"
+				filter="string"
+			/>
+
+			<!-- Administrator area only, read-only. filter="unset" drops whatever comes
+			     with the request: these values are never taken from a form. -->
+			<field
+				name="country_code"
+				type="text"
+				label="PLG_USER_MUCRONIXREGISTRATION_COUNTRY_CODE_LABEL"
+				readonly="true"
+				filter="unset"
+			/>
+
+			<field
+				name="reg_ip"
+				type="text"
+				label="PLG_USER_MUCRONIXREGISTRATION_REG_IP_LABEL"
+				description="PLG_USER_MUCRONIXREGISTRATION_REG_IP_DESC"
+				readonly="true"
+				filter="unset"
+			/>
+		</fieldset>
+	</fields>
+</form>

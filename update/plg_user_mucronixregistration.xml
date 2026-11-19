@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Update server for Mucronix Registration (plg_user_mucronixregistration).
+
+	Served straight from the public repository, branch main:
+	https://raw.githubusercontent.com/mucronix/plg_user_mucronixregistration/main/update/plg_user_mucronixregistration.xml
+	That address is the one in the manifest, so pushing this file to main is what publishes it.
+	It must not reach main before the release it points at exists and its checksum is filled in.
+	This file is not part of the installable package.
+
+	Draft until the first release: there is no <sha256> yet on purpose. An empty
+	element does not warn, it makes Joomla refuse the update. The checksum of the
+	archive downloaded back from the release is added at the release step.
+
+	targetplatform version is a regular expression anchored at the front:
+	6\.[0-9]+ covers the whole 6 branch and stops at 7.
+	php_minimum is read only from here, on update; the install script covers a first install.
+-->
+<updates>
+	<update>
+		<name>Mucronix Registration</name>
+		<description>Registration with country and region for Joomla 6</description>
+		<element>mucronixregistration</element>
+		<type>plugin</type>
+		<folder>user</folder>
+		<client>site</client>
+		<version>1.0.0</version>
+		<infourl title="Mucronix Registration">https://github.com/mucronix/plg_user_mucronixregistration</infourl>
+		<downloads>
+			<downloadurl type="full" format="zip">https://github.com/mucronix/plg_user_mucronixregistration/releases/download/v1.0.0/plg_user_mucronixregistration-1.0.0.zip</downloadurl>
+		</downloads>
+		<tags>
+			<tag>stable</tag>
+		</tags>
+		<maintainer>Mucronix</maintainer>
+		<maintainerurl>https://mucronix.com</maintainerurl>
+		<targetplatform name="joomla" version="6\.[0-9]+"/>
+		<php_minimum>8.3.0</php_minimum>
+	</update>
+</updates>
