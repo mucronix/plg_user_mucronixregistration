@@ -486,7 +486,8 @@ final class MucronixRegistration extends CMSPlugin implements SubscriberInterfac
     {
         $input = $this->getApplication()->getInput();
 
-        return $input->getCmd('layout') === 'edit' || $input->getCmd('task') !== '';
+        // getCmd() gives null, not an empty string, when there is no task.
+        return $input->getCmd('layout', '') === 'edit' || $input->getCmd('task', '') !== '';
     }
 
     /**
@@ -556,18 +557,43 @@ final class MucronixRegistration extends CMSPlugin implements SubscriberInterfac
 
         $input  = $app->getInput();
         $option = $input->getCmd('option');
-        $task   = $input->getCmd('task');
+
+        if ($option !== 'com_users') {
+            return null;
+        }
 
         // Activation, password reset and other extensions saving users are not touched.
         if ($isNew) {
-            return ($option === 'com_users' && $task === 'registration.register') ? self::SAVE_REGISTRATION : null;
+            return $this->isTask('registration', 'register') ? self::SAVE_REGISTRATION : null;
         }
 
-        if ($option === 'com_users' && $task === 'profile.save' && (int) $this->params->get('profile_site', self::PROFILE_EDIT) === self::PROFILE_EDIT) {
+        if ($this->isTask('profile', 'save') && (int) $this->params->get('profile_site', self::PROFILE_EDIT) === self::PROFILE_EDIT) {
             return self::SAVE_PROFILE;
         }
 
         return null;
+    }
+
+    /**
+     * Whether the request runs controller.task of com_users. The component dispatcher
+     * splits task=registration.register into controller=registration and task=register
+     * before the controller runs (Joomla\CMS\Dispatcher\ComponentDispatcher::dispatch),
+     * so both forms are accepted.
+     *
+     * @param   string  $controller  Controller name.
+     * @param   string  $task        Task name.
+     *
+     * @return  boolean
+     *
+     * @since   1.0.0
+     */
+    private function isTask(string $controller, string $task): bool
+    {
+        $input = $this->getApplication()->getInput();
+        $value = $input->getCmd('task');
+
+        return $value === $controller . '.' . $task
+            || ($value === $task && $input->getCmd('controller') === $controller);
     }
 
     /**

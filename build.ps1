@@ -98,6 +98,10 @@ $publishedFiles = @(
     'tests/bootstrap.php'
     'tests/language-check.php'
     'tests/logic-check.php'
+    'tests/registration-test.php'
+    'tests/site-db.php'
+    'tests/snapshot.php'
+    'tests/make-broken.php'
 )
 
 $namespace    = 'Mucronix\Plugin\User\MucronixRegistration'

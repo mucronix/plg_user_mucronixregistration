@@ -23,21 +23,42 @@
     }
 
     const wrapper = region.closest('.control-group') || region.parentNode;
+    const label = document.getElementById(`${region.id}-lbl`);
     const placeholder = region.querySelector('option[value=""]');
     const placeholderText = placeholder ? placeholder.textContent : '';
     let request = 0;
 
+    // The same mark the server puts on the label of a required field
+    // (layouts/joomla/form/renderlabel.php).
+    const markLabel = (required) => {
+      if (!label) {
+        return;
+      }
+
+      const star = label.querySelector('.star');
+
+      label.classList.toggle('required', required);
+
+      if (required && !star) {
+        const mark = document.createElement('span');
+        mark.className = 'star';
+        mark.setAttribute('aria-hidden', 'true');
+        mark.textContent = ' *';
+        label.appendChild(mark);
+      } else if (!required && star) {
+        star.remove();
+      }
+    };
+
     const show = (visible) => {
+      const required = visible && Boolean(options.required);
+
       wrapper.hidden = !visible;
 
       // A hidden required field would block the form in the browser.
-      if (visible && options.required) {
-        region.required = true;
-        region.classList.add('required');
-      } else {
-        region.required = false;
-        region.classList.remove('required');
-      }
+      region.required = required;
+      region.classList.toggle('required', required);
+      markLabel(required);
     };
 
     const fill = (list) => {
