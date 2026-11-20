@@ -82,6 +82,7 @@ $packageFiles = @(
     'sql/install.mysql.utf8.sql'
     'sql/uninstall.mysql.utf8.sql'
     'sql/updates/mysql/1.0.0.sql'
+    'sql/updates/mysql/1.0.1.sql'
 )
 
 # Folders that hold package files only: anything else in them stops the build.
@@ -95,6 +96,7 @@ $publishedFiles = @(
     '.gitattributes'
     'update/plg_user_mucronixregistration.xml'
     'tools/build-regions.php'
+    'tools/fetch-wikidata-ru.php'
     'tests/bootstrap.php'
     'tests/language-check.php'
     'tests/logic-check.php'
@@ -134,7 +136,7 @@ $bannedEncoded = @(
 )
 
 # The install SQL holds ISO codes, among them the code of Anguilla; it is generated and checked separately.
-$bannedExempt = @('sql/install.mysql.utf8.sql')
+$bannedExempt = @('sql/install.mysql.utf8.sql', 'sql/updates/mysql/1.0.1.sql')
 
 function Stop-Build([string[]]$problems) {
     [Console]::Error.WriteLine('nothing was built:')
@@ -296,17 +298,25 @@ if (-not (Test-Path $Php)) {
         if ($LASTEXITCODE -ne 0) { $problems += "php -l $file`: $($lint -join ' ')" }
     }
 
-    # --- the install SQL is the generated one
-    $generated = Join-Path ([System.IO.Path]::GetTempPath()) "$name-install-check.sql"
-    $log = & $Php (Join-Path $root 'tools/build-regions.php') "--output=$generated" 2>&1
+    # --- the install SQL and the data update file are the generated ones
+    $generated = Join-Path ([System.IO.Path]::GetTempPath()) "$name-sql-check"
+    if (Test-Path $generated) { Remove-Item $generated -Recurse -Force -Confirm:$false }
+    $log = & $Php (Join-Path $root 'tools/build-regions.php') "--output-dir=$generated" 2>&1
     if ($LASTEXITCODE -ne 0) {
         $problems += "tools/build-regions.php failed: $($log -join ' ')"
     } else {
-        $want = (Get-FileHash $generated -Algorithm SHA256).Hash
-        $have = (Get-FileHash (Join-Path $root 'sql/install.mysql.utf8.sql') -Algorithm SHA256).Hash
-        if ($want -cne $have) { $problems += 'sql/install.mysql.utf8.sql is not what tools/build-regions.php gives: run it, do not edit the SQL by hand' }
+        foreach ($file in Get-Listing $generated) {
+            if ($packageFiles -notcontains "sql/$file") { $problems += "tools/build-regions.php writes sql/$file, which is not in the package" }
+            $want = (Get-FileHash (Join-Path $generated $file) -Algorithm SHA256).Hash
+            $have = if (Test-Path (Join-Path $root "sql/$file")) { (Get-FileHash (Join-Path $root "sql/$file") -Algorithm SHA256).Hash } else { '' }
+            if ($want -cne $have) { $problems += "sql/$file is not what tools/build-regions.php gives: run it, do not edit the SQL by hand" }
+        }
+        $update = "sql/updates/mysql/$version.sql"
+        if ($packageFiles -contains $update -and -not (Test-Path (Join-Path $generated "updates/mysql/$version.sql"))) {
+            $problems += "$update is in the package, but tools/build-regions.php does not generate it: DATA_UPDATE is not $version"
+        }
     }
-    if (Test-Path $generated) { Remove-Item $generated -Force -Confirm:$false }
+    if (Test-Path $generated) { Remove-Item $generated -Recurse -Force -Confirm:$false }
 }
 
 # --- banned words in what is published beside the package

@@ -7,7 +7,7 @@
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<authorEmail>support@mucronix.com</authorEmail>
 	<authorUrl>https://mucronix.com</authorUrl>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<description>PLG_USER_MUCRONIXREGISTRATION_XML_DESCRIPTION</description>
 	<namespace path="src">Mucronix\Plugin\User\MucronixRegistration</namespace>
 	<scriptfile>script.php</scriptfile>

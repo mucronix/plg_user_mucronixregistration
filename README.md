@@ -76,11 +76,13 @@ The settings page says the same.
 
 The data comes from **iso-codes 4.20.1** (Debian, https://salsa.debian.org/iso-codes-team/iso-codes), which is licensed under **LGPL-2.1-or-later**. The full licence text is in `LICENSE-data.txt` in the package.
 
+Russian region names that iso-codes does not have come from **Wikidata** (https://www.wikidata.org, CC0), downloaded on 2026-11-19: the Russian label of the item that carries the region code (property P300).
+
 - **Countries:** ISO 3166-1, 249 countries. The common name is used where iso-codes has one, for example "Bolivia" instead of "Bolivia, Plurinational State of".
 - **Regions:** ISO 3166-2, first level only (oblasts, states, provinces). There are 3560 regions in 200 countries.
 - **Languages:** names are stored in the table in English, Ukrainian and Russian, not in language files. An empty translation falls back to the English name, which iso-codes gives in the local form.
   - Ukrainian: all countries and regions;
-  - Russian: all countries and about a third of the regions.
+  - Russian: all countries, and 3523 of the 3560 regions, all regions of Russia among them. 1130 names come from iso-codes, 2393 from Wikidata. The other 37 regions have no Russian name in either source and are shown in English.
 
 The data is changed from iso-codes in these ways. All changes are made by the build script, not by hand:
 
@@ -93,22 +95,29 @@ The data is changed from iso-codes in these ways. All changes are made by the bu
   - US-AS, US-GU, US-MP, US-PR, US-UM, US-VI.
 - **Notes in square brackets are dropped:** "Wales [Cymru GB-CYM]" becomes "Wales".
 - **The type is added where two regions of one country have the same name:** "Chiayi (city)" and "Chiayi (county)". This applies to 9 pairs.
-- **10 wrong translations are corrected,** where a region had the name of its neighbour. For example, the Ukrainian name of RU-KYA is "Красноярський край".
+- **12 wrong translations are corrected,** where a region had the name of its neighbour. For example, the Ukrainian name of RU-KYA is "Красноярський край", and the Ukrainian names of the North and South Aegean (GR-K, GR-L), which were swapped.
+- **Russian names from Wikidata** are used only where iso-codes has none. The order is: a correction, the iso-codes translation, the Wikidata label. The 9 same-name pairs keep their own names.
+  - Of the items that carry a code, the current one is taken: not deprecated, without an end date, not dissolved. Where there is no current item, the label of the ended item is used, because iso-codes still lists some subdivisions that no longer exist; this applies to 47 regions, among them the Vietnamese provinces merged in 2025.
+  - 15 labels start with a generic word in lower case, for example "уезд Чжанхуа"; the first letter is made upper case ("Уезд Чжанхуа"), the word stays.
+  - 3 Wikidata labels would give two regions of one country the same name; they follow the Ukrainian translation of iso-codes instead (BG-22, PE-LMA, SY-RD).
+  - The build stops when a label it would use has Latin letters, or two regions of one country end up with the same name.
 
-`tools/build-regions.php` builds `sql/install.mysql.utf8.sql` from the iso-codes files in `tools/source/`. To move to a new version of iso-codes:
+`tools/build-regions.php` builds `sql/install.mysql.utf8.sql` and the data update file in `sql/updates/mysql/` from the files in `tools/source/`. The build never goes to the network. To move to a new version of iso-codes:
 
 1. Download the six files from the new tag.
 2. Update the version and the checksums in the script.
 3. Run it and read its messages.
 
+To refresh the Russian names, run `tools/fetch-wikidata-ru.php`, which writes `tools/source/wikidata-p300-ru.json`, and update its checksum in the build script.
+
 The script stops when a correction is no longer needed or a code has disappeared.
 
-Joomla does not run the install SQL when a plugin is updated. Data changes for sites that already have the plugin go into a new file in `sql/updates/mysql/`.
+Joomla does not run the install SQL when a plugin is updated. When the data changes, the build script also writes `sql/updates/mysql/<version>.sql` for that release: it empties the countries and regions table and fills it again. The table holds the data only; user profiles are not touched. Version 1.0.1 is such a release.
 
 ## Known limitations
 
 - **Profile page display.** The profile page shows names through `HTMLHelper::register()`, the way the core profile plugin does. Joomla 6 marks this as deprecated and plans to remove it in Joomla 7. It stays here for now because the profile page of Joomla 6 looks only there; it will need another way when Joomla 7 is out.
-- **Translations.** Translations come from iso-codes. Russian region names are incomplete, so about two thirds of the regions are shown in their local Latin form on Russian sites.
+- **Translations.** Names come from iso-codes and Wikidata as they are. 37 regions have no Russian name in either source and are shown in English on Russian sites. Some names carry a generic word ("Уезд Чжанхуа", "Штат Мехико") and some have a note in brackets, as Wikidata gives them.
 - **Without JavaScript.** The region list cannot appear before the form is sent once.
 - **IP address behind a proxy.** The registration IP address is `REMOTE_ADDR`. Behind a proxy that does not pass the visitor's address to it, this is the address of the proxy.
 
@@ -134,6 +143,6 @@ The checks in `tests/` load the Joomla 6 libraries of a local site, read only, a
 
 ## Licence
 
-GNU General Public License version 2 or later, see `LICENSE.txt`. The countries and regions data is under LGPL-2.1-or-later, see `LICENSE-data.txt`.
+GNU General Public License version 2 or later, see `LICENSE.txt`. The countries and regions data is under LGPL-2.1-or-later, see `LICENSE-data.txt`; the Russian names taken from Wikidata are CC0.
 
 (C) 2026 Mucronix, https://mucronix.com

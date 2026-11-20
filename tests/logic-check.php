@@ -48,7 +48,15 @@ check('uk name of UA', $opts['UA'], 'Україна');
 check('249 countries offered', count($opts), 249);
 check('UA regions uk: 27', count($d->regionOptions('UA', 'uk-UA')), 27);
 check('ru name UA-53', $d->name('UA-53', 'ru-RU'), 'Полтавская область');
-check('ru empty -> english (GB-WLS)', $d->name('GB-WLS', 'ru-RU'), 'Wales');
+check('ru empty -> english (DO-33)', $d->name('DO-33', 'ru-RU'), 'Cibao Nordeste');
+check('ru from Wikidata (GB-WLS)', $d->name('GB-WLS', 'ru-RU'), 'Уэльс');
+check('Wikidata override (SY-RD)', $d->name('SY-RD', 'ru-RU'), 'Риф-Дамаск');
+check('Wikidata label capitalised (TW-CHA)', $d->name('TW-CHA', 'ru-RU'), 'Уезд Чжанхуа');
+check('Wikidata label capitalised, no clash with the city (MX-MEX)', [$d->name('MX-MEX', 'ru-RU'), $d->name('MX-CMX', 'ru-RU')], ['Штат Мехико', 'Мехико']);
+check('corrected: GR-K uk (North Aegean)', $d->name('GR-K', 'uk-UA'), 'Північні Егейські острови');
+// In PHP: SQLite lower() and upper() know ASCII only.
+check('no ru region name starts in lower case', array_values(array_filter($db->setQuery("SELECT name_ru FROM jos_mucronixregistration_regions WHERE type = 'region'")->loadColumn(), static fn($n) => preg_match('/^\p{Ll}/u', $n) === 1)), []);
+check('Russia: every region has a ru name', (int) $db->setQuery("SELECT COUNT(*) FROM jos_mucronixregistration_regions WHERE country_code = 'RU' AND type = 'region' AND name_ru = ''")->loadResult(), 0);
 check('de-DE -> english (UA)', $d->name('UA', 'de-DE'), 'Ukraine');
 check('corrected: RU-KYA uk', $d->name('RU-KYA', 'uk-UA'), 'Красноярський край');
 check('corrected: US-DC ru', $d->name('US-DC', 'ru-RU'), 'Округ Колумбия');
@@ -148,6 +156,44 @@ $cases = [
 foreach ($cases as [$label, $params, $submitted, $stored, $context, $want]) {
     check($label, $resolve($params, $submitted, $stored, $context), $want);
 }
+
+echo "Update file\n";
+$updateFiles = glob("$plugin/sql/updates/mysql/*.sql");
+usort($updateFiles, static fn($a, $b) => version_compare(basename($a, '.sql'), basename($b, '.sql')));
+$latest      = end($updateFiles);
+$updateSql   = file_get_contents($latest);
+$statements  = array_values(array_filter(array_map('trim', DatabaseDriver::splitSql($updateSql))));
+$kinds       = array_map(static fn($s) => strtok(preg_replace('/^(--[^\n]*\n)+/', '', $s), ' '), $statements);
+
+check('latest update file is ' . basename($latest), basename($latest), '1.0.1.sql');
+check('update file: CREATE IF NOT EXISTS, DELETE, then INSERTs only', array_values(array_unique($kinds)), ['CREATE', 'DELETE', 'INSERT']);
+check('update file does not touch the user profiles', str_contains($updateSql, 'user_profiles') && preg_match('/^(?!--).*user_profiles/m', $updateSql) === 1, false);
+
+$db->setQuery("INSERT INTO jos_mucronixregistration_regions VALUES ('XX-1', 'XX', 'region', 'Old', '', '', 1)")->execute();
+$db->setQuery("INSERT INTO jos_user_profiles VALUES (9, 'mucronixregistration.country', 'UA', 1)")->execute();
+
+foreach ($statements as $q) {
+    if (!str_starts_with(preg_replace('/^(--[^\n]*\n)+/', '', $q), 'CREATE')) {
+        $db->setQuery($q)->execute();
+    }
+}
+
+$installRows = 0;
+
+foreach (DatabaseDriver::splitSql(file_get_contents("$plugin/sql/install.mysql.utf8.sql")) as $q) {
+    $installRows += str_starts_with(trim($q), 'INSERT') ? preg_match_all("/^\('/m", $q) : 0;
+}
+
+check('after update: old row gone', (int) $db->setQuery("SELECT COUNT(*) FROM jos_mucronixregistration_regions WHERE code = 'XX-1'")->loadResult(), 0);
+check('after update: as many rows as the install file', (int) $db->setQuery('SELECT COUNT(*) FROM jos_mucronixregistration_regions')->loadResult(), $installRows);
+check('after update: user profile row kept', $db->setQuery("SELECT profile_value FROM jos_user_profiles WHERE user_id = 9")->loadResult(), 'UA');
+$installSql = file_get_contents("$plugin/sql/install.mysql.utf8.sql");
+check(
+    'install and update hold the same rows (sha256 of the INSERT part)',
+    hash('sha256', substr($updateSql, strpos($updateSql, "\nINSERT"))),
+    hash('sha256', substr($installSql, strpos($installSql, "\nINSERT")))
+);
+$db->setQuery('DELETE FROM jos_user_profiles')->execute();
 
 echo "Store\n";
 $p = new MucronixRegistration(['name' => 'mucronixregistration', 'type' => 'user', 'params' => new Registry([])]);

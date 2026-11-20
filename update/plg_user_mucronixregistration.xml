@@ -24,10 +24,10 @@
 		<type>plugin</type>
 		<folder>user</folder>
 		<client>site</client>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 		<infourl title="Mucronix Registration">https://github.com/mucronix/plg_user_mucronixregistration</infourl>
 		<downloads>
-			<downloadurl type="full" format="zip">https://github.com/mucronix/plg_user_mucronixregistration/releases/download/v1.0.0/plg_user_mucronixregistration-1.0.0.zip</downloadurl>
+			<downloadurl type="full" format="zip">https://github.com/mucronix/plg_user_mucronixregistration/releases/download/v1.0.1/plg_user_mucronixregistration-1.0.1.zip</downloadurl>
 		</downloads>
 		<tags>
 			<tag>stable</tag>
