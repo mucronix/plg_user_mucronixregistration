@@ -9,6 +9,13 @@ A free user plugin for Joomla 6 that makes registration simpler and adds country
 
 Plugin element: `plg_user_mucronixregistration` (group `user`, element `mucronixregistration`).
 
+## Download
+
+- Latest release: https://github.com/mucronix/plg_user_mucronixregistration/releases/latest (1.0.1: https://github.com/mucronix/plg_user_mucronixregistration/releases/tag/v1.0.1)
+- Product page: https://mucronix.com/products/joomla/mucronix-registration
+
+Sites with the plugin installed are offered new versions in **System → Update → Extensions**.
+
 ## Requirements
 
 - Joomla 6.0 or later
